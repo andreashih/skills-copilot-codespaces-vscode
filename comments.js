@@ -1,23 +1,32 @@
-// Create web sever
-// Create database connection
-// Create schema
-// Create model
-// Create API
-// Create test
-// Create front-end
-// Deploy to Heroku
+// Create web server
+// 1. Create a new express app
+// 2. Create a route handler for get requests to '/posts/:id/comments'
+// 3. Test your work using Postman
 
-// Create web sever
 const express = require('express');
-const bodyParser = require('body-parser');
+const { randomBytes } = require('crypto');
 const cors = require('cors');
-const app = express();
-const port = 5000;
+const bodyParser = require('body-parser');
 
-// Create database connection
-const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/mern-comment', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+
+const commentsByPostId = {};
+
+app.get('/posts/:id/comments', (req, res) => {
+  res.send(commentsByPostId[req.params.id] || []);
+});
+
+app.post('/posts/:id/comments', (req, res) => {
+  const commentId = randomBytes(4).toString('hex');
+  const { content } = req.body;
+  const comments = commentsByPostId[req.params.id] || [];
+  comments.push({ id: commentId, content });
+  commentsByPostId[req.params.id] = comments;
+  res.status(201).send(comments);
+});
+
+app.listen(4001, () => {
+  console.log('Listening on 4001');
 });
